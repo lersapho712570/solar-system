@@ -1,0 +1,144 @@
+<html>
+   <head>
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Ubuntu&display=swap" rel="stylesheet">
+
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Encode+Sans:wght@900&family=Ubuntu&display=swap" rel="stylesheet">
+
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=BioRhyme&family=Encode+Sans:wght@900&family=Ubuntu&display=swap" rel="stylesheet">
+
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap" rel="stylesheet">
+
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+      <meta name='viewport' content='width=device-width, initial-scale=1'>
+      <title>Solar System - Sid</title>
+      <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/lersapho712570/solar-system-app-init/refs/heads/main/images/saturn.png">
+      <style> 
+         #planetImage { 
+            background: url('https://raw.githubusercontent.com/lersapho712570/solar-system-app-init/refs/heads/main/images/solar-system.png')   center center; 
+            background-repeat: no-repeat;			   
+            background-size: cover; 
+            content: ''; 
+            position: static; 
+            animation: spin 25s linear infinite; 
+            width: 50vw; 
+            height: 50vw; 
+         } 
+         @keyframes spin { 
+             100% { transform: rotate(360deg); } 
+         } 
+         body { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            background: url('https://raw.githubusercontent.com/lersapho712570/solar-system-app-init/refs/heads/main/images/background.gif'); 
+         } 
+         /*.shadow { 
+         animation: rainbow 2s linear infinite; 
+         } */ 
+      </style>
+   </head>
+   <body>
+
+      <div>
+        <div>
+         <a href="index.html">
+            <button
+               style=" font-size: 40px; 
+                   background: rgb(50,43,167);
+                   background: linear-gradient(90deg, rgba(50,43,167,1) 0%, rgba(82,41,124,1) 0%, rgba(137,26,205,1) 100%);
+                   color:white;
+                   font-family: 'Orbitron', sans-serif;
+                   border-radius: 25px;     
+                   border: 2px solid rgb(35, 34, 36);    
+                   width: 600px; 
+                   height: 70px;
+                   text-align: center;
+                   line-height: initial;
+                   border-width: 1px 1px 3px"> SOLAR <i class="fa fa-rocket"></i> SYSTEM </button> 
+            </a>
+        </div>
+
+         <div>
+         <a href="index.html">
+            <button
+               style=" font-size: 30px; 
+                   background: linear-gradient(90deg, rgba(49, 43, 167, 0) 0%, rgba(82, 41, 124, 0) 0%, rgba(136, 26, 205, 0) 100%);
+                   color:white;
+                   font-family: 'Orbitron', sans-serif;
+                   border-radius: 25px;     
+                   border: 2px solid rgba(35, 34, 36, 0);    
+                   width: 600px; 
+                   height: 70px;
+                   text-align: left;
+                   line-height: initial;
+                   padding-left: 90px;
+                   border-width: 1px 1px 3px"> Build: {{BUILD_ID}}</button> 
+            </a>
+           
+        </div>
+
+        <br>
+
+
+<input type="number" id="planetID" name="number" 
+  style="
+    width: 100%;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    color: transparent;
+    caret-color: transparent;
+    padding: 20px;
+    text-align: center;
+  " placeholder=""/>
+
+
+<div style="display: grid; grid-template-columns: 150px 250px; gap: 20px; padding: 20px;text-align: center; ">
+
+  <div style="background: #02410a;height: 20px; border: 3px solid rgb(19, 199, 28); padding: 20px; font-weight: bold; font-family: Ubuntu, sans-serif; color: white;">
+    Secrete
+  </div>
+  <div style="height: 20px; border: 3px solid rgb(19, 199, 28); padding: 20px; font-weight: bold; font-family: Ubuntu, sans-serif; color: white;">
+    {{ENV_SECRET}}
+  </div>
+  <div style="background: #505403;height: 20px; border: 3px solid rgb(238, 160, 26); padding: 20px; font-weight: bold; font-family: Ubuntu, sans-serif; color: white;">
+    ConfigMap
+  </div>
+  <div style="height: 20px; border: 3px solid rgb(238, 160, 26); padding: 20px; font-weight: bold; font-family: Ubuntu, sans-serif; color: white;">
+    {{ENV_CONFIGMAP}}
+  </div>
+
+</div>
+
+
+
+         
+
+         <div class="middle">
+            <h1 style="color:rgb(247, 145, 95); font-family: 'Encode Sans';" id="planetName"> Solar System </h1>
+         </div>
+         <div class="bottomleft">
+            <p  style="color:rgb(224, 224, 224); font-family: 'Ubuntu';" id="planetDescription"> Solar system consists of our star, the Sun, and everything bound to it by gravity – <br> the planets Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, and Neptune; <br> dwarf planets such as Pluto; dozens of moons; and millions <br> of asteroids, comets, and meteoroids.</p>
+         </div>
+         <br>
+         <div class="middle">
+            <h2 style="color:rgb(93, 150, 237); font-family: 'BioRhyme';"  id="hostname">Solar System Pod Name</h2>
+
+            <!-- <h3 style="color:rgb(111, 255, 171); font-family: 'Encode Sans';" id="environment">ENVIRONMENT: " placeholder "</h3> -->
+         </div>
+      </div>
+      <div  id="planetImage">  
+      </div>
+      <script type="text/javascript"  src="app-controller.js" charset="utf-8"></script>
+   </body>
+</html>
