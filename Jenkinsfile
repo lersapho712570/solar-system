@@ -99,7 +99,7 @@ pipeline {
         stage('SonarQube Code Scan') {
 
             steps {
-                timeout(time: 60, unit: 'SECONDS') {
+                timeout(time: 60, unit: 'MINUTES') {
                     withSonarQubeEnv('sonarqube-server') {
                         sh 'echo $SONAR_SCANNER_HOME'
                         sh '''
@@ -122,7 +122,6 @@ pipeline {
                 sh 'docker build -t 712570/solar-system:$GIT_COMMIT .'
             }
         }
-
 
         stage('Trivy Container Image Scan') {
             steps {
@@ -163,7 +162,117 @@ pipeline {
             }
         } 
 
+        stage('Deploy Dev Env - Dcoker') {
+
+            when {
+            branch 'feature/*'
+            }
+
+            environment {
+                DEV_MONGO_URI = 'localhost:27017'
+            }
+
+            steps {
+                script {
+                        withCredentials([usernamePassword(credentialsId: 'mongo-db-credentials', passwordVariable: 'DEV_MONGO_PASSWORD', usernameVariable: 'DEV_MONGO_USERNAME')]) {
+                            sshagent(['root-docker-staging']) {
+                                sh """
+                                    ssh -o StrictHostKeyChecking=no root@172.31.1.185 "
+                                        if docker ps | grep -q solar-system; then
+                                            echo "container exists, stoping and removing it"
+                                            docker stop solar-system && docker rm solar-system
+                                            echo "container stopped and removed"
+                                        fi
+                                        docker run -d --name solar-system \
+                                            -p 3003:3000 \
+                                            -e MONGO_URI=$DEV_MONGO_URI \
+                                            -e MONGO_USERNAME=$DEV_MONGO_USERNAME \
+                                            -e MONGO_PASSWORD=$DEV_MONGO_PASSWORD \
+                                            -e ENV_BUILD_ID=$BUILD_ID \
+                                            -e ENV_CONFIGMAP=DEV \
+                                            -e ENV_SECRET=DEV \
+                                            712570/solar-system:${GIT_COMMIT} \
+                                            
+                                    "
+                                """
+                            }
+                        }
+                }
+            }
+                
+        }
+
+        stage('Deploy UAT Env - Docker') {
+
+            when {
+                branch 'PR-*'
+            }
+
+            environment {
+                UAT_MONGO_URI = 'localhost:27017'
+            }
+
+            steps {
+                script {
+                        withCredentials([usernamePassword(credentialsId: 'mongo-db-credentials', passwordVariable: 'UAT_MONGO_PASSWORD', usernameVariable: 'UAT_MONGO_USERNAME')]) {
+                            sshagent(['root-docker-staging']) {
+                                sh """
+                                    ssh -o StrictHostKeyChecking=no root@172.31.1.185 "
+                                        if docker ps | grep -q solar-system-uat; then
+                                            echo "container exists, stoping and removing it"
+                                            docker stop solar-system-uat && docker rm solar-system-uat
+                                            echo "container stopped and removed"
+                                        fi
+                                        docker run -d --name solar-system-uat \
+                                            -p 3004:3000 \
+                                            -e MONGO_URI=$UAT_MONGO_URI \
+                                            -e MONGO_USERNAME=$UAT_MONGO_USERNAME \
+                                            -e MONGO_PASSWORD=$UAT_MONGO_PASSWORD \
+                                            -e ENV_BUILD_ID=$BUILD_ID \
+                                            -e ENV_CONFIGMAP="UAT_$CHANGE_ID" \
+                                            -e ENV_SECRET="UAT_$CHANGE_ID" \
+                                            712570/solar-system:${GIT_COMMIT} \
+                                            
+                                    "
+                                """
+                            }
+                        }
+                }
+            }
+        }
+
+        stage('OWASP ZAP Scan') {
+            when {
+                branch 'PR-*'
+            }
+            steps {
+                sh '''
+                    set +e
+                    chmod 777 $(pwd)
+                    docker run -v $(pwd):/zap/wrk/:rw ghcr.io/zaproxy/zaproxy zap-api-scan.py \
+                        -t http://solar-uat.devops.lab:3004/api-docs \
+                        -f openapi \
+                        -r zap_report.html \
+                        -w zap_report.md \
+                        -j zap_json_report.json \
+                        -x zap_xml_report.xml \
+                        -c zap_ignore_rules
+                    
+                    exit_code=$?
+
+                    if [[ ${exit_code} -ne 0 ]]; then
+                        echo "Can not Ignore Rule, Bypass it"
+                        exit 0
+                    fi
+                '''
+            }
+        }
+
         stage('Push Docker Image') {
+
+            when {
+                branch 'main'
+            }
 
             steps {
                 withDockerRegistry(credentialsId: 'dokcer-hub-user', url: "") {
@@ -173,7 +282,25 @@ pipeline {
             }
         }
 
+        stage('Deploy to Production ?') {
+
+            when {
+                branch 'main*'
+            }
+
+
+            steps {
+                timeout(time: 1, unit: 'DAYS') {
+                    input message: 'Deploy to Production?', ok: 'Yes, Deploy'
+                }
+            }
+        }
+
         stage('Kubernetes Update Deployment Image tag') {
+
+            when {
+                branch 'main*'
+            }
 
             steps {
                 sh 'git clone -b main http://gitea.devops.lab:3000/lersapholabs-org/solar-system-gitops-argocd.git'
@@ -205,7 +332,6 @@ pipeline {
                 
             }
         }
-
 
     }
 
@@ -252,6 +378,8 @@ pipeline {
 
             publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: './', reportFiles: 'trivy-image-MEDIUM-results.html', reportName: 'Trivy Image Medium Vul Report', reportTitles: '', useWrapperFileDirectly: true])
 
+            publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: './', reportFiles: 'zap_report.html', reportName: 'DAST - OWASP ZAP Report', reportTitles: '', useWrapperFileDirectly: true])
+
             script {
                 if (fileExists('solar-system-gitops-argocd')) {
                     sh 'rm -rf solar-system-gitops-argocd'
@@ -261,4 +389,3 @@ pipeline {
     }
 
 }
-

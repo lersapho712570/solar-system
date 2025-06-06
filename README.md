@@ -46,8 +46,23 @@ If the installation was successful, you should be able to run the following comm
 
     $ npm run coverage
 
+## Run Application
+
+```bash
+export MONGO_URI="mongodb://localhost:27017/solar"
+export MONGO_USERNAME="your_user"
+export MONGO_PASSWORD="your_password"
+npm start
+```
+
+```ba
+$ npm start
+```
+
 ## Access Application on Browser
 
     http://localhost:3000/
+
+
 
 # END
